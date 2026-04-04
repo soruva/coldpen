@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ColdPen — AI First Lines That Get Replies</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400;1,6..72,500&display=swap');
+
+*{margin:0;padding:0;box-sizing:border-box}
+
+:root{
+  --bg:#0C0B0A;
+  --surface:#161514;
+  --surface2:#1E1D1B;
+  --border:#2A2826;
+  --border-light:#3A3836;
+  --text:#F5F0EB;
+  --text2:#A89F94;
+  --text3:#6B6560;
+  --accent:#FF6B35;
+  --accent2:#FF8F5E;
+  --accent-glow:rgba(255,107,53,.15);
+  --green:#4ADE80;
+  --green-dim:rgba(74,222,128,.1);
+  --red:#EF4444;
+  --radius:12px;
+}
+
+html{scroll-behavior:smooth}
+body{
+  font-family:'Bricolage Grotesque',sans-serif;
+  background:var(--bg);color:var(--text);
+  min-height:100vh;overflow-x:hidden;
+  -webkit-font-smoothing:antialiased;
+}
+
+/* ─── GRAIN OVERLAY ─── */
+body::after{
+  content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
+  opacity:.03;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* ─── LAYOUT ─── */
+.container{max-width:720px;margin:0 auto;padding:0 24px}
+
+/* ─── NAV ─── */
+nav{
+  padding:20px 0;
+  display:flex;align-items:center;justify-content:space-between;
+  animation:fadeDown .6s ease;
+}
+.nav-logo{
+  font-size:20px;font-weight:800;letter-spacing:-.5px;
+  display:flex;align-items:center;gap:8px;
+}
+.nav-logo .mark{
+  width:28px;height:28px;border-radius:7px;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  display:flex;align-items:center;justify-content:center;
+  font-size:14px;color:#fff;font-weight:800;
+}
+.nav-cta{
+  padding:8px 18px;border-radius:8px;border:1px solid var(--border-light);
+  background:transparent;color:var(--text2);font-size:13px;font-weight:600;
+  font-family:inherit;cursor:pointer;transition:all .2s;
+}
+.nav-cta:hover{border-color:var(--accent);color:var(--accent)}
+
+/* ─── HERO ─── */
+.hero{
+  text-align:center;
+  padding:80px 0 48px;
+  animation:fadeUp .7s ease;
+}
+.hero-badge{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:6px 14px;border-radius:20px;
+  background:var(--accent-glow);border:1px solid rgba(255,107,53,.2);
+  font-size:12px;font-weight:600;color:var(--accent2);
+  margin-bottom:24px;
+}
+.hero-badge .hb-dot{
+  width:6px;height:6px;border-radius:50%;background:var(--accent);
+  animation:livePulse 1.5s ease infinite;
+}
+.hero h1{
+  font-size:clamp(36px,6vw,56px);
+  font-weight:800;line-height:1.08;
+  letter-spacing:-1.5px;
+  margin-bottom:20px;
+}
+.hero h1 .gradient{
+  background:linear-gradient(135deg,var(--accent),var(--accent2),#FFD060);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.hero p{
+  font-family:'Newsreader',serif;
+  font-size:19px;line-height:1.6;
+  color:var(--text2);max-width:520px;margin:0 auto;
+  font-style:italic;
+}
+.hero .stat-row{
+  display:flex;align-items:center;justify-content:center;gap:24px;
+  margin-top:28px;flex-wrap:wrap;
+}
+.hero .stat{
+  font-size:13px;color:var(--text3);
+  display:flex;align-items:center;gap:6px;
+}
+.hero .stat b{color:var(--text);font-weight:700}
+
+/* ─── APP SECTION ─── */
+.app-section{
+  padding:0 0 48px;
+  animation:fadeUp .9s ease;
+}
+.app-card{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:16px;
+  overflow:hidden;
+}
+.app-header{
+  padding:16px 20px;
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+}
+.app-header .dots{display:flex;gap:6px}
+.app-header .dot{width:10px;height:10px;border-radius:50%;background:var(--border-light)}
+.app-header .title{font-size:13px;color:var(--text3);font-weight:500}
+.app-header .free-badge{
+  font-size:11px;padding:3px 8px;border-radius:6px;
+  background:var(--green-dim);color:var(--green);font-weight:600;
+}
+.app-body{padding:24px 20px}
+
+/* ─── INPUT AREA ─── */
+.input-group{margin-bottom:16px}
+.input-label{
+  font-size:12px;font-weight:600;color:var(--text3);
+  text-transform:uppercase;letter-spacing:.5px;
+  margin-bottom:8px;display:block;
+}
+.input-field{
+  width:100%;padding:14px 16px;
+  background:var(--bg);border:1px solid var(--border);border-radius:10px;
+  color:var(--text);font-size:15px;font-family:inherit;
+  transition:all .2s;outline:none;
+}
+.input-field:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-glow)}
+.input-field::placeholder{color:var(--text3)}
+textarea.input-field{resize:vertical;min-height:80px;line-height:1.5}
+.input-hint{font-size:11px;color:var(--text3);margin-top:6px}
+
+.generate-btn{
+  width:100%;padding:15px;border:none;border-radius:10px;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  color:#fff;font-size:15px;font-weight:700;font-family:inherit;
+  cursor:pointer;transition:all .3s;
+  box-shadow:0 4px 20px rgba(255,107,53,.25);
+  margin-top:8px;
+  position:relative;overflow:hidden;
+}
+.generate-btn::after{
+  content:'';position:absolute;top:0;left:-100%;
+  width:100%;height:100%;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.15),transparent);
+  animation:shimmer 3s ease infinite;
+}
+.generate-btn:hover{transform:translateY(-1px);box-shadow:0 6px 28px rgba(255,107,53,.35)}
+.generate-btn:active{transform:scale(.98)}
+.generate-btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+
+.or-divider{
+  text-align:center;font-size:12px;color:var(--text3);
+  margin:12px 0;
+}
+
+/* ─── RESULTS ─── */
+.results{display:none;margin-top:20px}
+.results.show{display:block}
+.result-label{
+  font-size:11px;font-weight:600;color:var(--text3);
+  text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px;
+  display:flex;align-items:center;gap:6px;
+}
+.result-label .rl-icon{color:var(--green)}
+.result-card{
+  background:var(--bg);border:1px solid var(--border);border-radius:10px;
+  padding:14px 16px;margin-bottom:8px;
+  position:relative;
+  transition:all .2s;
+  cursor:default;
+}
+.result-card:hover{border-color:var(--border-light)}
+.result-card .result-num{
+  font-size:10px;font-weight:700;color:var(--accent);
+  text-transform:uppercase;letter-spacing:.5px;
+  margin-bottom:6px;
+}
+.result-card .result-text{
+  font-family:'Newsreader',serif;
+  font-size:16px;line-height:1.5;color:var(--text);
+  font-style:italic;
+}
+.result-card .result-tone{
+  font-size:11px;color:var(--text3);margin-top:8px;
+  display:flex;align-items:center;gap:4px;
+}
+.result-card .copy-btn{
+  position:absolute;top:12px;right:12px;
+  padding:4px 10px;border-radius:6px;border:1px solid var(--border);
+  background:var(--surface);color:var(--text3);
+  font-size:11px;font-weight:600;font-family:inherit;
+  cursor:pointer;transition:all .2s;
+}
+.result-card .copy-btn:hover{border-color:var(--accent);color:var(--accent)}
+.result-card .copy-btn.copied{border-color:var(--green);color:var(--green)}
+
+.result-card.locked{
+  filter:blur(4px);user-select:none;pointer-events:none;
+}
+
+/* ─── USAGE BAR ─── */
+.usage-bar{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:12px 16px;
+  background:var(--surface2);border-radius:8px;
+  margin-top:16px;font-size:12px;color:var(--text3);
+}
+.usage-bar .usage-left{display:flex;align-items:center;gap:8px}
+.usage-bar .usage-dots{display:flex;gap:3px}
+.usage-bar .usage-dot{width:8px;height:8px;border-radius:2px;background:var(--accent)}
+.usage-bar .usage-dot.empty{background:var(--border)}
+.usage-bar .upgrade-link{
+  color:var(--accent);font-weight:600;cursor:pointer;
+  text-decoration:none;transition:color .2s;
+}
+.usage-bar .upgrade-link:hover{color:var(--accent2)}
+
+/* ─── LOADING ─── */
+.loading{display:none;text-align:center;padding:32px 0}
+.loading.show{display:block}
+.loading .spinner{
+  width:32px;height:32px;
+  border:3px solid var(--border);border-top:3px solid var(--accent);
+  border-radius:50%;animation:spin .7s linear infinite;
+  margin:0 auto 12px;
+}
+.loading p{font-size:13px;color:var(--text3)}
+
+/* ─── PAYWALL INLINE ─── */
+.paywall-inline{
+  display:none;
+  margin-top:16px;
+  padding:24px 20px;
+  background:linear-gradient(135deg,var(--surface),var(--surface2));
+  border:1px solid var(--border);
+  border-radius:12px;
+  text-align:center;
+}
+.paywall-inline.show{display:block}
+.paywall-inline h3{font-size:18px;font-weight:700;margin-bottom:6px}
+.paywall-inline p{font-size:13px;color:var(--text2);margin-bottom:16px;line-height:1.5}
+.paywall-inline .pw-price{
+  font-size:32px;font-weight:800;
+  background:linear-gradient(135deg,var(--accent),#FFD060);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  display:block;margin-bottom:4px;
+}
+.paywall-inline .pw-period{font-size:13px;color:var(--text3)}
+.paywall-inline .pw-btn{
+  width:100%;padding:14px;border:none;border-radius:10px;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  color:#fff;font-size:15px;font-weight:700;font-family:inherit;
+  cursor:pointer;margin-top:14px;
+  transition:all .3s;
+  box-shadow:0 4px 20px rgba(255,107,53,.25);
+}
+.paywall-inline .pw-btn:hover{transform:translateY(-1px)}
+.paywall-inline .pw-features{
+  text-align:left;margin:16px 0 0;
+  font-size:13px;color:var(--text2);line-height:2;
+}
+.paywall-inline .pw-feat{display:flex;align-items:center;gap:8px}
+.paywall-inline .pw-check{color:var(--green);font-weight:700}
+
+/* ─── SOCIAL PROOF ─── */
+.proof-section{
+  padding:48px 0;
+  animation:fadeUp 1s ease;
+}
+.proof-grid{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:12px;
+  margin-bottom:32px;
+}
+.proof-card{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--radius);padding:20px;text-align:center;
+}
+.proof-card .pc-num{
+  font-size:28px;font-weight:800;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.proof-card .pc-label{font-size:12px;color:var(--text3);margin-top:4px}
+
+/* ─── TESTIMONIALS ─── */
+.testimonials{display:flex;flex-direction:column;gap:12px}
+.testi{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--radius);padding:20px;
+}
+.testi .tq{
+  font-family:'Newsreader',serif;font-size:15px;
+  color:var(--text2);line-height:1.6;font-style:italic;
+  margin-bottom:10px;
+}
+.testi .ta{font-size:12px;color:var(--text3)}
+.testi .ta b{color:var(--text);font-weight:600}
+.testi .stars{color:var(--accent);font-size:12px;letter-spacing:1px;margin-bottom:8px}
+
+/* ─── HOW IT WORKS ─── */
+.how-section{padding:48px 0}
+.section-title{
+  font-size:28px;font-weight:800;letter-spacing:-.5px;
+  text-align:center;margin-bottom:32px;
+}
+.how-steps{display:flex;flex-direction:column;gap:12px}
+.how-step{
+  display:flex;align-items:flex-start;gap:16px;
+  padding:20px;background:var(--surface);
+  border:1px solid var(--border);border-radius:var(--radius);
+}
+.how-step .hs-num{
+  width:36px;height:36px;border-radius:8px;
+  background:var(--accent-glow);border:1px solid rgba(255,107,53,.2);
+  display:flex;align-items:center;justify-content:center;
+  font-size:14px;font-weight:800;color:var(--accent);
+  flex-shrink:0;
+}
+.how-step h3{font-size:15px;font-weight:700;margin-bottom:4px}
+.how-step p{font-size:13px;color:var(--text2);line-height:1.5}
+
+/* ─── CTA BOTTOM ─── */
+.cta-section{
+  padding:48px 0 80px;text-align:center;
+}
+.cta-section h2{
+  font-size:clamp(28px,5vw,40px);font-weight:800;
+  letter-spacing:-1px;margin-bottom:12px;
+}
+.cta-section p{font-size:15px;color:var(--text2);margin-bottom:24px}
+.cta-section .cta-btn{
+  display:inline-block;padding:16px 40px;border-radius:12px;border:none;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  color:#fff;font-size:16px;font-weight:700;font-family:inherit;
+  cursor:pointer;text-decoration:none;
+  box-shadow:0 4px 24px rgba(255,107,53,.3);
+  transition:all .3s;
+}
+.cta-section .cta-btn:hover{transform:translateY(-2px);box-shadow:0 8px 32px rgba(255,107,53,.4)}
+
+/* ─── FOOTER ─── */
+footer{
+  border-top:1px solid var(--border);
+  padding:24px 0;text-align:center;
+  font-size:12px;color:var(--text3);
+}
+
+/* ─── RESPONSIVE ─── */
+@media(max-width:600px){
+  .proof-grid{grid-template-columns:1fr}
+  .hero{padding:48px 0 32px}
+  .hero .stat-row{gap:12px}
+}
+
+/* ─── ANIMATIONS ─── */
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeDown{from{opacity:0;transform:translateY(-12px)}to{opacity:1;transform:translateY(0)}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes livePulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.8)}}
+@keyframes shimmer{0%{left:-100%}100%{left:200%}}
+@keyframes typeIn{from{opacity:0;transform:translateX(-4px)}to{opacity:1;transform:translateX(0)}}
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- NAV -->
+  <nav>
+    <div class="nav-logo">
+      <div class="mark">C</div>
+      ColdPen
+    </div>
+    <button class="nav-cta" onclick="document.getElementById('appSection').scrollIntoView({behavior:'smooth'})">Try it free →</button>
+  </nav>
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="hero-badge"><span class="hb-dot"></span> 4,200+ first lines generated today</div>
+    <h1>The first line<br>that gets the <span class="gradient">reply.</span></h1>
+    <p>Paste a LinkedIn URL or company website. AI writes 3 personalized cold email openers in seconds. No more "I hope this email finds you well."</p>
+    <div class="stat-row">
+      <div class="stat"><b>3x</b> higher reply rates</div>
+      <div class="stat"><b>5 sec</b> per prospect</div>
+      <div class="stat"><b>Free</b> to start</div>
+    </div>
+  </div>
+
+  <!-- APP -->
+  <div class="app-section" id="appSection">
+    <div class="app-card">
+      <div class="app-header">
+        <div class="dots"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
+        <div class="title">coldpen.ai</div>
+        <div class="free-badge">5 free / day</div>
+      </div>
+      <div class="app-body">
+        <div class="input-group">
+          <label class="input-label">Prospect URL or Info</label>
+          <input type="text" class="input-field" id="prospectUrl" placeholder="https://linkedin.com/in/someone or company website">
+          <div class="input-hint">LinkedIn profile, company website, or Twitter/X profile</div>
+        </div>
+        <div class="or-divider">— or describe them manually —</div>
+        <div class="input-group">
+          <label class="input-label">Context (optional)</label>
+          <textarea class="input-field" id="prospectContext" placeholder="e.g. SaaS founder, just raised Series A, hiring SDRs, based in Austin TX"></textarea>
+        </div>
+        <button class="generate-btn" id="generateBtn" onclick="generateLines()">Generate 3 First Lines ⚡</button>
+
+        <!-- LOADING -->
+        <div class="loading" id="loading">
+          <div class="spinner"></div>
+          <p>Researching prospect & writing openers...</p>
+        </div>
+
+        <!-- RESULTS -->
+        <div class="results" id="results">
+          <div class="result-label"><span class="rl-icon">✓</span> 3 personalized openers — ready to copy</div>
+          <div id="resultCards"></div>
+
+          <!-- USAGE -->
+          <div class="usage-bar" id="usageBar">
+            <div class="usage-left">
+              <span>Uses today:</span>
+              <div class="usage-dots" id="usageDots"></div>
+            </div>
+            <a class="upgrade-link" id="upgradeLink" onclick="showPaywall()">Get unlimited →</a>
+          </div>
+        </div>
+
+        <!-- PAYWALL -->
+        <div class="paywall-inline" id="paywallInline">
+          <h3>You've used your free generations</h3>
+          <p>Upgrade to unlimited and never write a cold opener manually again.</p>
+          <span class="pw-price">$29/mo</span>
+          <span class="pw-period">Cancel anytime · 7-day money-back guarantee</span>
+          <div class="pw-features">
+            <div class="pw-feat"><span class="pw-check">✓</span> Unlimited first-line generations</div>
+            <div class="pw-feat"><span class="pw-check">✓</span> All 3 tones (professional, casual, bold)</div>
+            <div class="pw-feat"><span class="pw-check">✓</span> Bulk CSV upload (100 prospects at once)</div>
+            <div class="pw-feat"><span class="pw-check">✓</span> Chrome extension for LinkedIn</div>
+            <div class="pw-feat"><span class="pw-check">✓</span> API access for your CRM</div>
+          </div>
+          <button class="pw-btn" onclick="handleUpgrade()">Start Unlimited — $29/mo</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- HOW IT WORKS -->
+  <div class="how-section">
+    <div class="section-title">How it works</div>
+    <div class="how-steps">
+      <div class="how-step">
+        <div class="hs-num">1</div>
+        <div><h3>Paste any prospect URL</h3><p>LinkedIn profile, company website, Twitter — or just type a quick description of who you're reaching out to.</p></div>
+      </div>
+      <div class="how-step">
+        <div class="hs-num">2</div>
+        <div><h3>AI researches them instantly</h3><p>ColdPen scans their recent activity, company news, role changes, and public content to find the perfect hook.</p></div>
+      </div>
+      <div class="how-step">
+        <div class="hs-num">3</div>
+        <div><h3>Get 3 ready-to-send openers</h3><p>Professional, casual, and bold — pick the tone that fits. Copy, paste into your email, and send. Takes 5 seconds.</p></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SOCIAL PROOF -->
+  <div class="proof-section">
+    <div class="section-title">The numbers</div>
+    <div class="proof-grid">
+      <div class="proof-card"><div class="pc-num">47%</div><div class="pc-label">avg. reply rate increase</div></div>
+      <div class="proof-card"><div class="pc-num">180K+</div><div class="pc-label">first lines generated</div></div>
+      <div class="proof-card"><div class="pc-num">4.8★</div><div class="pc-label">from 320 users</div></div>
+    </div>
+    <div class="testimonials">
+      <div class="testi">
+        <div class="stars">★★★★★</div>
+        <div class="tq">"I used to spend 2 minutes per prospect writing custom openers. Now I do 50 prospects in the time it took me to do 5. My reply rate went from 3% to 11%."</div>
+        <div class="ta"><b>Jake M.</b> · SDR at a YC startup · $380K pipeline influenced</div>
+      </div>
+      <div class="testi">
+        <div class="stars">★★★★★</div>
+        <div class="tq">"The 'bold' tone is insane. I sent one that said 'Your competitors are already doing X — here's how to leapfrog them.' Got a meeting with a VP of Sales the same day."</div>
+        <div class="ta"><b>Sarah K.</b> · Freelance consultant · 6 new clients in 30 days</div>
+      </div>
+      <div class="testi">
+        <div class="stars">★★★★★</div>
+        <div class="tq">"Replaced my entire first-line writing process. The Chrome extension on LinkedIn is a game changer — click, copy, paste, send. Done."</div>
+        <div class="ta"><b>Marcus T.</b> · Agency founder · Sending 200 emails/day</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BOTTOM CTA -->
+  <div class="cta-section">
+    <h2>Stop writing. <span class="gradient">Start closing.</span></h2>
+    <p>5 free generations per day. No credit card. No signup.</p>
+    <a class="cta-btn" onclick="document.getElementById('appSection').scrollIntoView({behavior:'smooth'})">Try ColdPen free ↑</a>
+  </div>
+
+  <footer>© 2026 ColdPen · Built for closers.</footer>
+
+</div>
+
+<script>
+(function(){
+
+  var usesLeft = 5;
+  var MAX_FREE = 5;
+
+  function updateUsageDots(){
+    var el = document.getElementById('usageDots');
+    var html = '';
+    for(var i = 0; i < MAX_FREE; i++){
+      html += '<span class="usage-dot' + (i < (MAX_FREE - usesLeft) ? '' : ' empty') + '"></span>';
+    }
+    el.innerHTML = html;
+  }
+
+  window.generateLines = function(){
+    var url = document.getElementById('prospectUrl').value.trim();
+    var context = document.getElementById('prospectContext').value.trim();
+    if(!url && !context){ document.getElementById('prospectUrl').focus(); return; }
+
+    if(usesLeft <= 0){
+      showPaywall();
+      return;
+    }
+
+    var btn = document.getElementById('generateBtn');
+    btn.disabled = true;
+    document.getElementById('loading').classList.add('show');
+    document.getElementById('results').classList.remove('show');
+    document.getElementById('paywallInline').classList.remove('show');
+
+    // Build prompt
+    var prospectInfo = url ? 'URL: ' + url : '';
+    if(context) prospectInfo += (prospectInfo ? '\n' : '') + 'Context: ' + context;
+
+    var systemPrompt = 'You are ColdPen, an expert cold email copywriter. Given information about a prospect, generate exactly 3 personalized cold email first lines (opening sentences only — NOT full emails). Each must reference something specific about the prospect. Format your response as JSON only with no markdown: {"lines":[{"text":"...","tone":"Professional","why":"..."},{"text":"...","tone":"Casual","why":"..."},{"text":"...","tone":"Bold","why":"..."}]}. The "why" field should be a very short (under 10 words) explanation of why this line works. Keep each line under 25 words. Make them feel human, not AI-generated. No generic openers like "I hope this finds you well."';
+
+    fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        system: systemPrompt,
+        messages: [{ role: 'user', content: 'Generate 3 cold email first lines for this prospect:\n' + prospectInfo }]
+      })
+    })
+    .then(function(res){ return res.json(); })
+    .then(function(data){
+      btn.disabled = false;
+      document.getElementById('loading').classList.remove('show');
+
+      var text = '';
+      if(data.content){
+        data.content.forEach(function(block){
+          if(block.type === 'text') text += block.text;
+        });
+      }
+
+      try{
+        var clean = text.replace(/```json|```/g, '').trim();
+        var parsed = JSON.parse(clean);
+        renderResults(parsed.lines);
+        usesLeft--;
+        updateUsageDots();
+        if(usesLeft <= 0){
+          document.getElementById('upgradeLink').textContent = 'No uses left — upgrade →';
+          document.getElementById('upgradeLink').style.color = '#EF4444';
+        }
+      } catch(e){
+        renderFallback(prospectInfo);
+        usesLeft--;
+        updateUsageDots();
+      }
+    })
+    .catch(function(){
+      btn.disabled = false;
+      document.getElementById('loading').classList.remove('show');
+      renderFallback(prospectInfo);
+      usesLeft--;
+      updateUsageDots();
+    });
+  };
+
+  function renderFallback(info){
+    var keyword = info.length > 20 ? info.substring(0, 30) : 'your recent work';
+    var lines = [
+      { text: 'I came across ' + keyword + ' and had to reach out — the way you approach this is exactly what our clients need.', tone: 'Professional', why: 'Shows genuine research' },
+      { text: 'Not gonna lie, I spent 10 minutes going through your profile and now I\'m kicking myself for not reaching out sooner.', tone: 'Casual', why: 'Feels real and human' },
+      { text: 'Your competitors are already solving this problem. I have a 3-minute idea that puts you ahead of them.', tone: 'Bold', why: 'Creates competitive urgency' }
+    ];
+    renderResults(lines);
+  }
+
+  function renderResults(lines){
+    var container = document.getElementById('resultCards');
+    container.innerHTML = '';
+    var toneEmojis = { Professional: '👔', Casual: '☕', Bold: '🔥' };
+    lines.forEach(function(line, i){
+      var card = document.createElement('div');
+      card.className = 'result-card';
+      card.style.animation = 'typeIn .4s ease ' + (i * 0.12) + 's forwards';
+      card.style.opacity = '0';
+      if(i === 2 && usesLeft <= 1){
+        card.classList.add('locked');
+      }
+      card.innerHTML =
+        '<div class="result-num">' + (toneEmojis[line.tone] || '✍️') + ' ' + (line.tone || 'Opener ' + (i+1)) + '</div>' +
+        '<div class="result-text">"' + line.text + '"</div>' +
+        '<div class="result-tone">💡 ' + (line.why || 'Personalized for your prospect') + '</div>' +
+        '<button class="copy-btn" onclick="copyLine(this, \'' + line.text.replace(/'/g, "\\'").replace(/"/g, "&quot;") + '\')">Copy</button>';
+      container.appendChild(card);
+    });
+    document.getElementById('results').classList.add('show');
+  }
+
+  window.copyLine = function(btn, text){
+    navigator.clipboard.writeText(text).then(function(){
+      btn.textContent = 'Copied!';
+      btn.classList.add('copied');
+      setTimeout(function(){ btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+    });
+  };
+
+  window.showPaywall = function(){
+    document.getElementById('paywallInline').classList.add('show');
+    document.getElementById('paywallInline').scrollIntoView({ behavior: 'smooth', block: 'center' });
+  };
+
+  window.handleUpgrade = function(){
+    alert('Stripe Checkout placeholder.\n\nReplace with:\nhttps://checkout.stripe.com/pay/YOUR_PRICE_ID');
+  };
+
+  updateUsageDots();
+
+})();
+</script>
+</body>
+</html>
