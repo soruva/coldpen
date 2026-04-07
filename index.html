@@ -583,51 +583,68 @@ Get your first reply in 5 seconds →
 
     var systemPrompt = 'You are ColdPen, an expert cold email copywriter. Given information about a prospect, generate exactly 3 personalized cold email first lines (opening sentences only — NOT full emails). Each must reference something specific about the prospect. Format your response as JSON only with no markdown: {"lines":[{"text":"...","tone":"Professional","why":"..."},{"text":"...","tone":"Casual","why":"..."},{"text":"...","tone":"Bold","why":"..."}]}. The "why" field should be a very short (under 10 words) explanation of why this line works. Keep each line under 25 words. Make them feel human, not AI-generated. No generic openers like "I hope this finds you well."';
 
-    fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 1000,
-        system: systemPrompt,
-        messages: [{ role: 'user', content: 'Generate 3 cold email first lines for this prospect:\n' + prospectInfo }]
-      })
-    })
-    .then(function(res){ return res.json(); })
-    .then(function(data){
-      btn.disabled = false;
-      document.getElementById('loading').classList.remove('show');
-
-      var text = '';
-      if(data.content){
-        data.content.forEach(function(block){
-          if(block.type === 'text') text += block.text;
-        });
+    fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=YOUR_API_KEY", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json"
+  },
+  body: JSON.stringify({
+    contents: [
+      {
+        role: "user",
+        parts: [
+          {
+            text:
+              systemPrompt +
+              "\n\nGenerate 3 cold email first lines for this prospect:\n" +
+              prospectInfo
+          }
+        ]
       }
+    ]
+  })
+})
+.then(function(res){ return res.json(); })
+.then(function(data){
+  btn.disabled = false;
+  document.getElementById('loading').classList.remove('show');
 
-      try{
-        var clean = text.replace(/```json|```/g, '').trim();
-        var parsed = JSON.parse(clean);
-        renderResults(parsed.lines);
-        usesLeft--;
-        updateUsageDots();
-        if(usesLeft <= 0){
-          document.getElementById('upgradeLink').textContent = 'No uses left — upgrade →';
-          document.getElementById('upgradeLink').style.color = '#EF4444';
-        }
-      } catch(e){
-        renderFallback(prospectInfo);
-        usesLeft--;
-        updateUsageDots();
-      }
-    })
-    .catch(function(){
-      btn.disabled = false;
-      document.getElementById('loading').classList.remove('show');
-      renderFallback(prospectInfo);
-      usesLeft--;
-      updateUsageDots();
-    });
+  let text = "";
+
+  try {
+    text = data.candidates[0].content.parts[0].text;
+  } catch (e) {
+    renderFallback(prospectInfo);
+    usesLeft--;
+    updateUsageDots();
+    return;
+  }
+
+  try{
+    var clean = text.replace(/```json|```/g, '').trim();
+    var parsed = JSON.parse(clean);
+    renderResults(parsed.lines);
+    usesLeft--;
+    updateUsageDots();
+
+    if(usesLeft <= 0){
+      document.getElementById('upgradeLink').textContent = 'No uses left — upgrade →';
+      document.getElementById('upgradeLink').style.color = '#EF4444';
+    }
+
+  } catch(e){
+    renderFallback(prospectInfo);
+    usesLeft--;
+    updateUsageDots();
+  }
+})
+.catch(function(){
+  btn.disabled = false;
+  document.getElementById('loading').classList.remove('show');
+  renderFallback(prospectInfo);
+  usesLeft--;
+  updateUsageDots();
+});
   };
 
   function renderFallback(info){
